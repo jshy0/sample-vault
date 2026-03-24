@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Play, Pause, Music } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Sample } from "@/types/sample";
 import { useSamples } from "@/hooks/useSamples";
+import { usePlayerStore } from "@/store/playerStore";
 
 function SampleRow({
   sample,
@@ -12,14 +13,14 @@ function SampleRow({
 }: {
   sample: Sample;
   isPlaying: boolean;
-  onPlayPause: () => void;
+  onPlayPause: (fileUrl: string) => void;
 }) {
   return (
     <div className="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-secondary/50 transition-colors group">
       {/* Play button */}
       <button
         type="button"
-        onClick={onPlayPause}
+        onClick={() => onPlayPause(sample.file_url)}
         className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground transition-colors"
         aria-label={isPlaying ? "Pause" : "Play"}
       >
@@ -30,22 +31,11 @@ function SampleRow({
         )}
       </button>
 
-      {/* Waveform placeholder */}
-      <div className="shrink-0 w-24 h-8 flex items-end gap-px opacity-40 group-hover:opacity-70 transition-opacity">
-        {Array.from({ length: 24 }, (_, i) => (
-          <div
-            key={i}
-            className="flex-1 bg-primary rounded-sm"
-            style={{ height: `${20 + Math.sin(i * 1.3) * 14}px` }}
-          />
-        ))}
-      </div>
-
       {/* Name */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{sample.name}</p>
         <p className="text-xs text-muted-foreground truncate">
-          {sample.user_id}
+          {sample.username}
         </p>
       </div>
 
@@ -69,13 +59,47 @@ function SampleRow({
 
 export default function LatestSamples() {
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [playError, setPlayError] = useState<string | null>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useSamples();
   const samples = data?.pages.flat() ?? [];
 
-  function handlePlayPause(id: string) {
-    setPlayingId((prev) => (prev === id ? null : id));
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const volume = usePlayerStore((s) => s.volume);
+
+  // Keep audio volume in sync with the navbar slider
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = volume;
+  }, [volume]);
+
+  async function handlePlayPause(id: string, fileUrl: string) {
+    setPlayError(null);
+    if (playingId === id) {
+      audioRef.current?.pause();
+      setPlayingId(null);
+      return;
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+    }
+    if (!fileUrl) {
+      setPlayError("No audio file available for this sample.");
+      return;
+    }
+    const audio = new Audio(fileUrl);
+    audio.volume = volume;
+    audioRef.current = audio;
+    audio.onended = () => setPlayingId(null);
+    try {
+      await audio.play();
+      setPlayingId(id);
+    } catch (err) {
+      console.error("Playback failed:", err);
+      setPlayError("Playback failed. The file may not be accessible.");
+      setPlayingId(null);
+    }
   }
 
   return (
@@ -100,11 +124,14 @@ export default function LatestSamples() {
               key={sample.id}
               sample={sample}
               isPlaying={playingId === sample.id}
-              onPlayPause={() => handlePlayPause(sample.id)}
+              onPlayPause={(fileUrl) => handlePlayPause(sample.id, fileUrl)}
             />
           ))
         )}
       </div>
+      {playError && (
+        <p className="mt-3 text-xs text-destructive text-center">{playError}</p>
+      )}
 
       <div className="mt-6 flex justify-center">
         <Button

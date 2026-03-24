@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Search, Menu, X, Vault, Upload } from "lucide-react";
+import { Search, Menu, X, Vault, Upload, Volume2, VolumeX } from "lucide-react";
+import { usePlayerStore } from "@/store/playerStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router";
@@ -19,6 +20,8 @@ export default function Navbar() {
   const navigate = useNavigate();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const clearToken = useAuthStore((s) => s.clearToken);
+  const volume = usePlayerStore((s) => s.volume);
+  const setVolume = usePlayerStore((s) => s.setVolume);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/90 backdrop-blur-md">
@@ -41,6 +44,32 @@ export default function Navbar() {
               type="search"
               placeholder="Search samples..."
               className="pl-9 bg-secondary border-border/50 focus:border-primary/50 focus:ring-primary/20 h-9"
+            />
+          </div>
+
+          {/* Volume slider */}
+          <div className="hidden md:flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setVolume(volume === 0 ? 0.8 : 0)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label={volume === 0 ? "Unmute" : "Mute"}
+            >
+              {volume === 0 ? (
+                <VolumeX className="h-4 w-4" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
+            </button>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={volume}
+              onChange={(e) => setVolume(Number(e.target.value))}
+              className="w-20 accent-primary cursor-pointer"
+              aria-label="Volume"
             />
           </div>
 

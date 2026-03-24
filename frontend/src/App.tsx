@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import LandingPage from "@/pages/LandingPage";
 import SignInPage from "@/pages/SignInPage";
+import UploadPage from "@/pages/UploadPage";
 
 const queryClient = new QueryClient();
 
@@ -15,6 +16,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/sign-in" element={<SignInPage />} />
+            <Route path="/upload" element={<UploadPage />} />
           </Routes>
         </div>
       </BrowserRouter>
