@@ -18,15 +18,6 @@ export default function Hero() {
           filter: "blur(80px)",
         }}
       />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-20 -right-40 h-[400px] w-[400px] rounded-full opacity-10"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, hsl(300 80% 60% / 0.6) 0%, transparent 70%)",
-          filter: "blur(60px)",
-        }}
-      />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-20">
         {/* Headline */}
@@ -75,7 +66,7 @@ export default function Hero() {
         </div>
 
         {/* Quick tag pills */}
-        <div className="flex flex-wrap justify-center gap-2 mb-16">
+        <div className="flex flex-wrap justify-center gap-2">
           {QUICK_TAGS.map((tag) => (
             <button
               key={tag}
