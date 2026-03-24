@@ -20,19 +20,22 @@ export const SamplesRepository = {
     return result.rows[0] ?? null;
   },
 
-  async create(userId: string, data: CreateSampleDTO): Promise<Sample> {
+  async create(
+    userId: string,
+    data: CreateSampleDTO,
+    fileUrl: string,
+  ): Promise<Sample> {
     const result = await pool.query(
       `INSERT INTO samples (id, user_id, name, bpm, key, tags, file_url) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [
-        randomUUID(),
-        userId,
-        data.name,
-        data.bpm,
-        data.key,
-        data.tags,
-        data.file_url,
-      ],
+      [randomUUID(), userId, data.name, data.bpm, data.key, data.tags, fileUrl],
     );
     return result.rows[0];
+  },
+
+  async delete(id: string, userId: string): Promise<void> {
+    await pool.query("DELETE FROM samples WHERE id = $1 AND user_id = $2", [
+      id,
+      userId,
+    ]);
   },
 };

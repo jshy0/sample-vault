@@ -5,7 +5,6 @@ export const CreateSampleSchema = z.object({
   bpm: z.number().int().positive().min(20).max(300),
   key: z.string(),
   tags: z.array(z.string()).default([]),
-  file_url: z.url(),
 });
 
 export type CreateSampleDTO = z.infer<typeof CreateSampleSchema>;

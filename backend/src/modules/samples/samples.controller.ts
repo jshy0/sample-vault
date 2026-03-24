@@ -17,14 +17,37 @@ export const SamplesController = {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.user!.userId;
-      const parsed = CreateSampleSchema.safeParse(req.body);
 
-      if (!parsed.success) {
-        return res.status(400).json({ error: z.treeifyError(parsed.error) });
+      if (!req.file) {
+        return res.status(400).json({ error: "Audio file is required" });
       }
 
-      const sample = await SamplesService.createSample(userId, parsed.data);
+      const parsed = CreateSampleSchema.safeParse({
+        ...req.body,
+        bpm: Number(req.body.bpm),
+        tags: JSON.parse(req.body.tags ?? "[]"),
+      });
+
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.flatten() });
+      }
+
+      const sample = await SamplesService.createSample(
+        userId,
+        parsed.data,
+        req.file,
+      );
       res.status(201).json(sample);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async remove(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.userId;
+      await SamplesService.deleteSample(req.params.id as string, userId);
+      res.status(204).send();
     } catch (err) {
       next(err);
     }
