@@ -1,0 +1,57 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { randomUUID } from "crypto";
+import { AuthRepository } from "./auth.repository";
+import { RegisterDTO, LoginDTO } from "./auth.schema";
+import { JwtPayload } from "./auth.types";
+
+const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_EXPIRES_IN = "7d";
+
+export const AuthService = {
+  async register(data: RegisterDTO) {
+    const existing = await AuthRepository.findByEmail(data.email);
+
+    if (existing) {
+      const err = Object.assign(new Error("Email already in use"), {
+        status: 409,
+      });
+      throw err;
+    }
+
+    const passwordHash = await bcrypt.hash(data.password, 12);
+    const user = await AuthRepository.create(
+      randomUUID(),
+      data.email,
+      passwordHash,
+    );
+
+    const token = signToken({ userId: user.id, email: user.email });
+    return { token };
+  },
+
+  async login(data: LoginDTO) {
+    const user = await AuthRepository.findByEmail(data.email);
+
+    if (!user) {
+      const err = Object.assign(new Error("Invalid credentials"), {
+        status: 401,
+      });
+      throw err;
+    }
+
+    const valid = await bcrypt.compare(data.password, user.password_hash);
+    if (!valid) {
+      const err = Object.assign(new Error("Invalid credentials"), {
+        status: 401,
+      });
+      throw err;
+    }
+    const token = signToken({ userId: user.id, email: user.email });
+    return { token };
+  },
+};
+
+function signToken(payload: JwtPayload) {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+}
