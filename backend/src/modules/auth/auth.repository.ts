@@ -9,13 +9,30 @@ export const AuthRepository = {
     return result.rows[0] ?? null;
   },
 
-  async create(id: string, email: string, passwordHash: string): Promise<User> {
+  async findByUsername(username: string): Promise<User | null> {
+    const result = await pool.query("SELECT * FROM users WHERE username = $1", [
+      username,
+    ]);
+    return result.rows[0] ?? null;
+  },
+
+  async create(
+    id: string,
+    email: string,
+    username: string,
+    passwordHash: string,
+  ): Promise<User> {
     const result = await pool.query(
-      `INSERT INTO users (id, email, password_hash)
-       VALUES ($1, $2, $3)
+      `INSERT INTO users (id, email, username, password_hash)
+       VALUES ($1, $2, $3, $4)
        RETURNING *`,
-      [id, email, passwordHash],
+      [id, email, username, passwordHash],
     );
     return result.rows[0];
+  },
+
+  async findById(id: string): Promise<User | null> {
+    const result = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+    return result.rows[0] ?? null;
   },
 };

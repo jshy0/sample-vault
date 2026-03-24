@@ -10,10 +10,19 @@ const JWT_EXPIRES_IN = "7d";
 
 export const AuthService = {
   async register(data: RegisterDTO) {
-    const existing = await AuthRepository.findByEmail(data.email);
+    const [existingEmail, existingUsername] = await Promise.all([
+      AuthRepository.findByEmail(data.email),
+      AuthRepository.findByUsername(data.username),
+    ]);
 
-    if (existing) {
+    if (existingEmail) {
       const err = Object.assign(new Error("Email already in use"), {
+        status: 409,
+      });
+      throw err;
+    }
+    if (existingUsername) {
+      const err = Object.assign(new Error("Username already taken"), {
         status: 409,
       });
       throw err;
@@ -23,10 +32,15 @@ export const AuthService = {
     const user = await AuthRepository.create(
       randomUUID(),
       data.email,
+      data.username,
       passwordHash,
     );
 
-    const token = signToken({ userId: user.id, email: user.email });
+    const token = signToken({
+      userId: user.id,
+      email: user.email,
+      username: user.username,
+    });
     return { token };
   },
 
@@ -47,8 +61,16 @@ export const AuthService = {
       });
       throw err;
     }
-    const token = signToken({ userId: user.id, email: user.email });
+    const token = signToken({
+      userId: user.id,
+      email: user.email,
+      username: user.username,
+    });
     return { token };
+  },
+
+  async getUserById(id: string) {
+    return await AuthRepository.findById(id);
   },
 };
 
