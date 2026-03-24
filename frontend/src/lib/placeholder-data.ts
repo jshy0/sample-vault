@@ -1,0 +1,18 @@
+export const GENRE_TAGS = [
+  "Hip-Hop",
+  "Trap",
+  "Lo-Fi",
+  "House",
+  "Techno",
+  "Drum & Bass",
+  "Funk",
+  "Soul",
+  "Ambient",
+  "Synthwave",
+  "Jazz",
+  "R&B",
+  "Afrobeats",
+  "Reggaeton",
+  "Drill",
+  "UK Garage",
+];
