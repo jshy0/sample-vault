@@ -1,6 +1,12 @@
 import { apiClient } from "./client";
 
-interface AuthPayload {
+interface RegisterPayload {
+  email: string;
+  username: string;
+  password: string;
+}
+
+interface LoginPayload {
   email: string;
   password: string;
 }
@@ -9,7 +15,9 @@ interface AuthResponse {
   token: string;
 }
 
-export async function register(payload: AuthPayload): Promise<AuthResponse> {
+export async function register(
+  payload: RegisterPayload,
+): Promise<AuthResponse> {
   const { data } = await apiClient.post<AuthResponse>(
     "/auth/register",
     payload,
@@ -17,7 +25,7 @@ export async function register(payload: AuthPayload): Promise<AuthResponse> {
   return data;
 }
 
-export async function login(payload: AuthPayload): Promise<AuthResponse> {
+export async function login(payload: LoginPayload): Promise<AuthResponse> {
   const { data } = await apiClient.post<AuthResponse>("/auth/login", payload);
   return data;
 }

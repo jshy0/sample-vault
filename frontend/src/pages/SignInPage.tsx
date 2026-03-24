@@ -9,12 +9,29 @@ import { useAuthStore } from "@/store/authStore";
 import { login, register as registerUser } from "@/api/auth";
 import { isAxiosError } from "axios";
 
-const schema = z.object({
+const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
   password: z.string().min(8, "Password must be at least 8 characters."),
 });
 
-type FormValues = z.infer<typeof schema>;
+const registerSchema = z.object({
+  email: z.string().email("Please enter a valid email address."),
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters.")
+    .max(30, "Username must be at most 30 characters.")
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username may only contain letters, numbers, and underscores.",
+    ),
+  password: z.string().min(8, "Password must be at least 8 characters."),
+});
+
+type FormValues = {
+  email: string;
+  username: string;
+  password: string;
+};
 type Tab = "sign-in" | "register";
 
 export default function SignInPage() {
@@ -29,7 +46,10 @@ export default function SignInPage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(
+      tab === "sign-in" ? signInSchema : registerSchema,
+    ) as any,
   });
 
   function switchTab(next: Tab) {
@@ -42,7 +62,9 @@ export default function SignInPage() {
     setServerError("");
     try {
       const { token } =
-        tab === "sign-in" ? await login(data) : await registerUser(data);
+        tab === "sign-in"
+          ? await login({ email: data.email, password: data.password })
+          : await registerUser(data);
       setToken(token);
       navigate("/");
     } catch (err) {
@@ -99,6 +121,26 @@ export default function SignInPage() {
           className="space-y-4"
           noValidate
         >
+          {tab === "register" && (
+            <div className="space-y-1.5">
+              <label htmlFor="username" className="text-sm font-medium">
+                Username
+              </label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="your_username"
+                autoComplete="username"
+                {...register("username")}
+              />
+              {errors.username && (
+                <p className="text-xs text-destructive">
+                  {errors.username.message}
+                </p>
+              )}
+            </div>
+          )}
+
           <div className="space-y-1.5">
             <label htmlFor="email" className="text-sm font-medium">
               Email
