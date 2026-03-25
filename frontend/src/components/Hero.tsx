@@ -40,8 +40,8 @@ export default function Hero() {
 
         {/* Subheadline */}
         <p className="text-center text-muted-foreground text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-          Discover free loops, one-shots, and sample packs from thousands of
-          producers. Everything you need to build your next track.
+          Discover free loops, one-shots, and sample packs created by our
+          community of producers. Everything you need to build your next track.
         </p>
 
         {/* Search bar */}
