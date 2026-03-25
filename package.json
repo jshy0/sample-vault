@@ -13,8 +13,5 @@
   "type": "commonjs",
   "devDependencies": {
     "concurrently": "^9.2.1"
-  },
-  "dependencies": {
-    "react-hook-form": "^7.72.0"
   }
 }
