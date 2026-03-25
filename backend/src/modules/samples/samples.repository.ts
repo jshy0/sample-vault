@@ -6,7 +6,7 @@ import { Sample } from "./samples.types";
 export const SamplesRepository = {
   async findAll(): Promise<Sample[]> {
     const result = await pool.query(
-      `SELECT s.*, u.username
+      `SELECT s.id, s.name, s.bpm, s.key, s.tags, s.file_url, s.created_at, u.username
        FROM samples s
        JOIN users u ON u.id = s.user_id
        ORDER BY s.created_at DESC`,

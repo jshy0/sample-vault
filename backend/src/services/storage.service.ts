@@ -11,7 +11,7 @@ export const StorageService = {
         Bucket: S3_BUCKET,
         Key: key,
         Body: file.buffer,
-        ContentType: file.mimetype,
+        ContentType: "audio/wav",
       }),
     );
 

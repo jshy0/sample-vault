@@ -21,10 +21,17 @@ export const SamplesController = {
         return res.status(400).json({ error: "Audio file is required" });
       }
 
+      let tags: unknown;
+      try {
+        tags = JSON.parse(req.body.tags ?? "[]");
+      } catch {
+        return res.status(400).json({ error: "Invalid JSON for tags field." });
+      }
+
       const parsed = CreateSampleSchema.safeParse({
         ...req.body,
         bpm: Number(req.body.bpm),
-        tags: JSON.parse(req.body.tags ?? "[]"),
+        tags,
       });
 
       if (!parsed.success) {
