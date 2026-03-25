@@ -19,7 +19,7 @@ export const StorageService = {
   },
 
   async delete(fileUrl: string): Promise<void> {
-    const key = fileUrl.split(".amazonaws.com/")[1];
+    const key = new URL(fileUrl).pathname.slice(1);
 
     await s3.send(
       new DeleteObjectCommand({
