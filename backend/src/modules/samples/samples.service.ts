@@ -3,8 +3,8 @@ import { StorageService } from "../../services/storage.service.js";
 import { CreateSampleDTO } from "./samples.schema.js";
 
 export const SamplesService = {
-  async getAllSamples(userId: string) {
-    return SamplesRepository.findAll(userId);
+  async getAllSamples() {
+    return SamplesRepository.findAll();
   },
 
   async createSample(

@@ -4,14 +4,12 @@ import { CreateSampleDTO } from "./samples.schema";
 import { Sample } from "./samples.types";
 
 export const SamplesRepository = {
-  async findAll(userId: string): Promise<Sample[]> {
+  async findAll(): Promise<Sample[]> {
     const result = await pool.query(
       `SELECT s.*, u.username
        FROM samples s
        JOIN users u ON u.id = s.user_id
-       WHERE s.user_id = $1
        ORDER BY s.created_at DESC`,
-      [userId],
     );
     return result.rows;
   },

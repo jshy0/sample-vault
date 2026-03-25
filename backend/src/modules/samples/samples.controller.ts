@@ -6,8 +6,7 @@ import { CreateSampleSchema } from "./samples.schema.js";
 export const SamplesController = {
   async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = req.user!.userId;
-      const samples = await SamplesService.getAllSamples(userId);
+      const samples = await SamplesService.getAllSamples();
       res.json(samples);
     } catch (err) {
       next(err);
