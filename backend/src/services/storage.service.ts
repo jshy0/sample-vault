@@ -4,8 +4,7 @@ import { s3, S3_BUCKET } from "../config/s3.js";
 
 export const StorageService = {
   async upload(file: Express.Multer.File, userId: string): Promise<string> {
-    const ext = file.originalname.split(".").pop();
-    const key = `samples/${userId}/${randomUUID()}.${ext}`;
+    const key = `samples/${userId}/${randomUUID()}.wav`;
 
     await s3.send(
       new PutObjectCommand({
