@@ -6,7 +6,7 @@ import { RegisterDTO, LoginDTO } from "./auth.schema";
 import { JwtPayload } from "./auth.types";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_EXPIRES_IN = "7d";
+const JWT_EXPIRES_IN = "1d";
 
 export const AuthService = {
   async register(data: RegisterDTO) {
@@ -15,16 +15,11 @@ export const AuthService = {
       AuthRepository.findByUsername(data.username),
     ]);
 
-    if (existingEmail) {
-      const err = Object.assign(new Error("Email already in use"), {
-        status: 409,
-      });
-      throw err;
-    }
-    if (existingUsername) {
-      const err = Object.assign(new Error("Username already taken"), {
-        status: 409,
-      });
+    if (existingEmail || existingUsername) {
+      const err = Object.assign(
+        new Error("An account with those credentials already exists."),
+        { status: 409 },
+      );
       throw err;
     }
 
