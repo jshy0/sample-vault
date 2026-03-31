@@ -11,19 +11,6 @@ export const MUSICAL_KEYS = [
   "A",
   "A#",
   "B",
-  "Cm",
-  "C#m",
-  "Dm",
-  "D#m",
-  "Em",
-  "Fm",
-  "F#m",
-  "Gm",
-  "G#m",
-  "Am",
-  "A#m",
-  "Bm",
-  "—",
 ];
 
 export const MUSICAL_MODES = ["Major", "Minor"];

@@ -16,6 +16,15 @@ import {
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  function handleSearch(e: { preventDefault: () => void }) {
+    e.preventDefault();
+    if (!query.trim()) return;
+    navigate(`/samples?q=${encodeURIComponent(query.trim())}`);
+    setQuery("");
+    setSearchOpen(false);
+  }
 
   const navigate = useNavigate();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
@@ -38,14 +47,16 @@ export default function Navbar() {
           </a>
 
           {/* Desktop search */}
-          <div className="hidden md:flex flex-1 max-w-sm items-center relative">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-sm items-center relative">
             <Search className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
               type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               placeholder="Search samples..."
               className="pl-9 bg-secondary border-border/50 focus:border-primary/50 focus:ring-primary/20 h-9"
             />
-          </div>
+          </form>
 
           {/* Volume slider */}
           <div className="hidden md:flex items-center gap-2 shrink-0">
@@ -151,15 +162,19 @@ export default function Navbar() {
         {/* Mobile search bar */}
         {searchOpen && (
           <div className="md:hidden pb-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                autoFocus
-                type="search"
-                placeholder="Search samples..."
-                className="pl-9 bg-secondary border-border/50"
-              />
-            </div>
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  autoFocus
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search samples..."
+                  className="pl-9 bg-secondary border-border/50"
+                />
+              </div>
+            </form>
           </div>
         )}
       </div>

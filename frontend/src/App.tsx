@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import LandingPage from "@/pages/LandingPage";
 import SignInPage from "@/pages/SignInPage";
 import UploadPage from "@/pages/UploadPage";
+import SearchResultsPage from "@/pages/SearchResults";
 
 const queryClient = new QueryClient();
 
@@ -15,6 +16,7 @@ function App() {
           <Navbar />
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/samples" element={<SearchResultsPage />} />
             <Route path="/sign-in" element={<SignInPage />} />
             <Route path="/upload" element={<UploadPage />} />
           </Routes>

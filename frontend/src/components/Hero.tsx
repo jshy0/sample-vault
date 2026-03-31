@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Search, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { GENRE_TAGS } from "@/lib/placeholder-data";
@@ -6,6 +8,14 @@ import { GENRE_TAGS } from "@/lib/placeholder-data";
 const QUICK_TAGS = GENRE_TAGS.slice(0, 8);
 
 export default function Hero() {
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
+  function handleSubmit(e: { preventDefault: () => void }) {
+    e.preventDefault();
+    navigate(`/samples?q=${encodeURIComponent(query.trim())}`);
+  }
+
   return (
     <section className="relative overflow-hidden bg-background">
       {/* Ambient glow blobs */}
@@ -45,17 +55,20 @@ export default function Hero() {
         </p>
 
         {/* Search bar */}
-        <div className="mx-auto max-w-2xl mb-8">
+        <form onSubmit={handleSubmit} className="mx-auto max-w-2xl mb-8">
           <div className="flex gap-2 p-1.5 rounded-xl border border-border/60 bg-secondary/50 backdrop-blur-sm shadow-xl shadow-black/20">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder='Try "90 bpm hip-hop loop" or "dark trap 808"'
                 className="pl-12 h-12 bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base placeholder:text-muted-foreground/60"
               />
             </div>
             <Button
+              type="submit"
               size="lg"
               className="h-12 px-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 shrink-0"
             >
@@ -63,13 +76,15 @@ export default function Hero() {
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
-        </div>
+        </form>
 
         {/* Quick tag pills */}
         <div className="flex flex-wrap justify-center gap-2">
           {QUICK_TAGS.map((tag) => (
             <button
               key={tag}
+              type="button"
+              onClick={() => navigate(`/samples?q=${encodeURIComponent(tag)}`)}
               className="px-3 py-1.5 rounded-full text-xs font-medium border border-border/60 bg-secondary/50 text-muted-foreground hover:border-primary/40 hover:text-foreground hover:bg-primary/10 transition-all duration-200 cursor-pointer"
             >
               {tag}

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useCreateSample } from "@/hooks/useSamples";
-import { MUSICAL_KEYS } from "@/lib/constants";
+import { MUSICAL_KEYS, MUSICAL_MODES } from "@/lib/constants";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -16,8 +16,11 @@ const schema = z.object({
     .number({ error: "BPM must be a number" })
     .int()
     .min(20, "Min BPM is 20")
-    .max(300, "Max BPM is 300"),
-  key: z.string().min(1, "Key is required"),
+    .max(300, "Max BPM is 300")
+    .optional()
+    .or(z.literal("")),
+  key: z.string().optional(),
+  mode: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -38,7 +41,7 @@ export default function UploadPage() {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { key: "—" },
+    defaultValues: { key: "", mode: "" },
   });
 
   function handleFileDrop(e: React.DragEvent) {
@@ -84,8 +87,9 @@ export default function UploadPage() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("name", data.name);
-    formData.append("bpm", String(data.bpm));
-    formData.append("key", data.key);
+    if (data.bpm) formData.append("bpm", String(data.bpm));
+    if (data.key) formData.append("key", data.key);
+    if (data.mode) formData.append("mode", data.mode);
     formData.append("tags", JSON.stringify(tags));
     await createSample(formData);
     navigate("/");
@@ -167,10 +171,15 @@ export default function UploadPage() {
             )}
           </div>
 
-          {/* BPM + Key */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* BPM + Key + Mode */}
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">BPM</label>
+              <label className="text-sm font-medium">
+                BPM{" "}
+                <span className="text-muted-foreground font-normal">
+                  (optional)
+                </span>
+              </label>
               <Input
                 type="number"
                 placeholder="e.g. 140"
@@ -181,20 +190,42 @@ export default function UploadPage() {
               )}
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Key</label>
+              <label className="text-sm font-medium">
+                Key{" "}
+                <span className="text-muted-foreground font-normal">
+                  (optional)
+                </span>
+              </label>
               <select
                 {...register("key")}
                 className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
               >
+                <option value="">—</option>
                 {MUSICAL_KEYS.map((k) => (
                   <option key={k} value={k}>
                     {k}
                   </option>
                 ))}
               </select>
-              {errors.key && (
-                <p className="text-xs text-destructive">{errors.key.message}</p>
-              )}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">
+                Mode{" "}
+                <span className="text-muted-foreground font-normal">
+                  (optional)
+                </span>
+              </label>
+              <select
+                {...register("mode")}
+                className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="">—</option>
+                {MUSICAL_MODES.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
