@@ -15,7 +15,7 @@ const uploadRateLimit = rateLimit({
   legacyHeaders: false,
 });
 
-router.get("/", SamplesController.getAll);
+router.get("/", SamplesController.search);
 router.post(
   "/",
   authenticate,

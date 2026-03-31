@@ -1,7 +1,6 @@
-import { z } from "zod";
 import { Request, Response, NextFunction } from "express";
 import { SamplesService } from "./samples.service.js";
-import { CreateSampleSchema } from "./samples.schema.js";
+import { CreateSampleSchema, SearchQuerySchema } from "./samples.schema.js";
 
 export const SamplesController = {
   async getAll(req: Request, res: Response, next: NextFunction) {
@@ -30,7 +29,7 @@ export const SamplesController = {
 
       const parsed = CreateSampleSchema.safeParse({
         ...req.body,
-        bpm: Number(req.body.bpm),
+        bpm: req.body.bpm !== undefined ? Number(req.body.bpm) : undefined,
         tags,
       });
 
@@ -56,6 +55,19 @@ export const SamplesController = {
       res.status(204).send();
     } catch (err) {
       next(err);
+    }
+  },
+
+  async search(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsed = SearchQuerySchema.safeParse(req.query);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.flatten() });
+      }
+      const samples = await SamplesService.searchSamples(parsed.data);
+      res.json(samples);
+    } catch (error) {
+      next(error);
     }
   },
 };

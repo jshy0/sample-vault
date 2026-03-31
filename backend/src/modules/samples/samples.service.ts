@@ -1,6 +1,6 @@
 import { SamplesRepository } from "./samples.repository.js";
 import { StorageService } from "../../services/storage.service.js";
-import { CreateSampleDTO } from "./samples.schema.js";
+import { CreateSampleDTO, SearchQueryDTO } from "./samples.schema.js";
 
 export const SamplesService = {
   async getAllSamples() {
@@ -24,5 +24,10 @@ export const SamplesService = {
 
     await StorageService.delete(sample.file_url);
     await SamplesRepository.delete(id, userId);
+  },
+
+  async searchSamples(params: SearchQueryDTO) {
+    const samples = await SamplesRepository.search(params);
+    return samples;
   },
 };
