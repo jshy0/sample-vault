@@ -1,6 +1,24 @@
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { Sample } from "@/types/sample";
+import { useAuthStore } from "@/store/authStore";
+
+async function handleDownload(
+  fileUrl: string,
+  name: string,
+  isLoggedIn: boolean,
+) {
+  if (!isLoggedIn) return;
+  const res = await fetch(fileUrl);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 interface SampleRowProps {
   sample: Sample;
@@ -13,6 +31,7 @@ export default function SampleRow({
   isPlaying,
   onPlayPause,
 }: SampleRowProps) {
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   return (
     <div className="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-secondary/50 transition-colors group">
       <button
@@ -53,6 +72,20 @@ export default function SampleRow({
           </Badge>
         ))}
       </div>
+
+      {isLoggedIn && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() =>
+            handleDownload(sample.fileUrl, sample.name, isLoggedIn)
+          }
+          aria-label="Download"
+          className="shrink-0"
+        >
+          <Download className="w-4 h-4" />
+        </Button>
+      )}
     </div>
   );
 }
