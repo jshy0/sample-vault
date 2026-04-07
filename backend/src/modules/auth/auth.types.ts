@@ -2,11 +2,11 @@ export interface User {
   id: string;
   email: string;
   username: string;
-  password_hash: string;
-  created_at: Date;
+  passwordHash: string;
+  createdAt: Date;
 }
 
-export type SafeUser = Omit<User, "password_hash">;
+export type SafeUser = Omit<User, "passwordHash">;
 
 export interface JwtPayload {
   userId: string;

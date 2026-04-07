@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/Josh/Documents/projects/sample-vault -type f \\\\\\(-name *.test.ts -o -name *.test.tsx -o -name *.spec.ts -o -name *.spec.tsx \\\\\\))",
+      "Bash(wc -l /c/Users/Josh/Documents/projects/sample-vault/backend/src/modules/**/*.ts /c/Users/Josh/Documents/projects/sample-vault/frontend/src/**/*.tsx)",
+      "WebFetch(domain:www.prisma.io)"
+    ]
+  }
+}

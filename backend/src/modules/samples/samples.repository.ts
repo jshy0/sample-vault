@@ -1,25 +1,34 @@
-import { randomUUID } from "crypto";
-import { pool } from "../../db";
+import { prisma } from "../../db";
 import { CreateSampleDTO, SearchQueryDTO } from "./samples.schema";
 import { Sample } from "./samples.types";
 
+function flattenSample(sample: {
+  id: string;
+  userId: string;
+  name: string;
+  bpm: number | null;
+  key: string | null;
+  mode: string | null;
+  tags: string[];
+  fileUrl: string;
+  createdAt: Date;
+  user: { username: string };
+}): Sample {
+  const { user, ...rest } = sample;
+  return { ...rest, username: user.username };
+}
+
 export const SamplesRepository = {
   async findAll(): Promise<Sample[]> {
-    const result = await pool.query(
-      `SELECT s.id, s.name, s.bpm, s.key, s.mode, s.tags, s.file_url, s.created_at, u.username
-       FROM samples s
-       JOIN users u ON u.id = s.user_id
-       ORDER BY s.created_at DESC`,
-    );
-    return result.rows;
+    const samples = await prisma.sample.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { user: { select: { username: true } } },
+    });
+    return samples.map(flattenSample);
   },
 
-  async findById(id: string, userId: string): Promise<Sample | null> {
-    const result = await pool.query(
-      "SELECT * FROM samples WHERE id = $1 AND user_id = $2",
-      [id, userId],
-    );
-    return result.rows[0] ?? null;
+  async findById(id: string, userId: string) {
+    return prisma.sample.findFirst({ where: { id, userId } });
   },
 
   async create(
@@ -27,50 +36,37 @@ export const SamplesRepository = {
     data: CreateSampleDTO,
     fileUrl: string,
   ): Promise<Sample> {
-    const result = await pool.query(
-      `INSERT INTO samples (id, user_id, name, bpm, key, mode, tags, file_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [
-        randomUUID(),
+    const sample = await prisma.sample.create({
+      data: {
         userId,
-        data.name,
-        data.bpm,
-        data.key,
-        data.mode,
-        data.tags,
+        name: data.name,
+        bpm: data.bpm,
+        key: data.key,
+        mode: data.mode,
+        tags: data.tags ?? [],
         fileUrl,
-      ],
-    );
-    return result.rows[0];
+      },
+      include: { user: { select: { username: true } } },
+    });
+    return flattenSample(sample);
   },
 
   async delete(id: string, userId: string): Promise<void> {
-    await pool.query("DELETE FROM samples WHERE id = $1 AND user_id = $2", [
-      id,
-      userId,
-    ]);
+    await prisma.sample.deleteMany({ where: { id, userId } });
   },
 
   async search(params: SearchQueryDTO): Promise<Sample[]> {
-    const result = await pool.query(
-      `
-      SELECT s.id, s.name, s.bpm, s.key, s.mode, s.tags, s.file_url, s.created_at, u.username
-      FROM samples s
-      JOIN users u on u.id = s.user_id
-      WHERE ($1::text IS NULL or s.name ILIKE '%' || $1 || '%')
-        AND ($2::int IS NULL or s.bpm >= $2)
-        AND ($3::int IS NULL or s.bpm <= $3)
-        AND ($4::text IS NULL or s.key = $4)
-        AND ($5::text IS NULL or s.mode = $5)
-        ORDER BY s.created_at DESC
-      `,
-      [
-        params.q ?? null,
-        params.bpm_min ?? null,
-        params.bpm_max ?? null,
-        params.key ?? null,
-        params.mode ?? null,
-      ],
-    );
-    return result.rows;
+    const samples = await prisma.sample.findMany({
+      where: {
+        ...(params.q && { name: { contains: params.q, mode: "insensitive" } }),
+        ...(params.bpm_min !== undefined && { bpm: { gte: params.bpm_min } }),
+        ...(params.bpm_max !== undefined && { bpm: { lte: params.bpm_max } }),
+        ...(params.key && { key: params.key }),
+        ...(params.mode && { mode: params.mode }),
+      },
+      orderBy: { createdAt: "desc" },
+      include: { user: { select: { username: true } } },
+    });
+    return samples.map(flattenSample);
   },
 };

@@ -6,6 +6,6 @@ export interface Sample {
   key: string | null;
   mode: string | null;
   tags: string[];
-  file_url: string;
-  created_at: Date;
+  fileUrl: string;
+  createdAt: Date;
 }

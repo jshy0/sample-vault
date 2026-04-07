@@ -1,6 +1,5 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { randomUUID } from "crypto";
 import { AuthRepository } from "./auth.repository";
 import { RegisterDTO, LoginDTO } from "./auth.schema";
 import { JwtPayload } from "./auth.types";
@@ -25,7 +24,6 @@ export const AuthService = {
 
     const passwordHash = await bcrypt.hash(data.password, 12);
     const user = await AuthRepository.create(
-      randomUUID(),
       data.email,
       data.username,
       passwordHash,
@@ -49,7 +47,7 @@ export const AuthService = {
       throw err;
     }
 
-    const valid = await bcrypt.compare(data.password, user.password_hash);
+    const valid = await bcrypt.compare(data.password, user.passwordHash);
     if (!valid) {
       const err = Object.assign(new Error("Invalid credentials"), {
         status: 401,

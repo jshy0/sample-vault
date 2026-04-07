@@ -17,7 +17,7 @@ export default function SampleRow({
     <div className="flex items-center gap-4 px-4 py-3 rounded-lg hover:bg-secondary/50 transition-colors group">
       <button
         type="button"
-        onClick={() => onPlayPause(sample.id, sample.file_url)}
+        onClick={() => onPlayPause(sample.id, sample.fileUrl)}
         className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground transition-colors"
         aria-label={isPlaying ? "Pause" : "Play"}
       >
