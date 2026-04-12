@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search, Menu, X, Vault, Upload, Volume2, VolumeX } from "lucide-react";
 import { usePlayerStore } from "@/store/playerStore";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,19 @@ import {
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [volumeOpen, setVolumeOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const volumeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (volumeRef.current && !volumeRef.current.contains(e.target as Node)) {
+        setVolumeOpen(false);
+      }
+    }
+    if (volumeOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [volumeOpen]);
 
   function handleSearch(e: { preventDefault: () => void }) {
     e.preventDefault();
@@ -47,7 +59,10 @@ export default function Navbar() {
           </a>
 
           {/* Desktop search */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-sm items-center relative">
+          <form
+            onSubmit={handleSearch}
+            className="hidden md:flex flex-1 max-w-sm items-center relative"
+          >
             <Search className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
               type="search"
@@ -58,34 +73,54 @@ export default function Navbar() {
             />
           </form>
 
-          {/* Volume slider */}
-          <div className="hidden md:flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => setVolume(volume === 0 ? 0.8 : 0)}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label={volume === 0 ? "Unmute" : "Mute"}
-            >
-              {volume === 0 ? (
-                <VolumeX className="h-4 w-4" />
-              ) : (
-                <Volume2 className="h-4 w-4" />
-              )}
-            </button>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={volume}
-              onChange={(e) => setVolume(Number(e.target.value))}
-              className="w-20 accent-primary cursor-pointer"
-              aria-label="Volume"
-            />
-          </div>
-
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-2">
+            {/* Volume button + popup */}
+            <div ref={volumeRef} className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 text-muted-foreground hover:text-foreground"
+                onClick={() => setVolumeOpen((o) => !o)}
+                aria-label="Volume"
+              >
+                {volume === 0 ? (
+                  <VolumeX className="h-4 w-4" />
+                ) : (
+                  <Volume2 className="h-4 w-4" />
+                )}
+              </Button>
+              {volumeOpen && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 flex flex-col items-center gap-2 rounded-xl border border-border/60 bg-background/95 backdrop-blur-md shadow-lg px-3 py-3 z-50">
+                  <span className="text-xs text-muted-foreground font-medium tabular-nums">
+                    {Math.round(volume * 100)}%
+                  </span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={volume}
+                    onChange={(e) => setVolume(Number(e.target.value))}
+                    className="accent-primary cursor-pointer"
+                    style={{ writingMode: "vertical-lr", direction: "rtl", height: 80, width: 16 }}
+                    aria-label="Volume"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setVolume(volume === 0 ? 0.8 : 0)}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={volume === 0 ? "Unmute" : "Mute"}
+                  >
+                    {volume === 0 ? (
+                      <VolumeX className="h-3.5 w-3.5" />
+                    ) : (
+                      <Volume2 className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
             {isLoggedIn ? (
               <>
                 <Button
