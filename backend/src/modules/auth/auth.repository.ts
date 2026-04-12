@@ -22,7 +22,7 @@ export const AuthRepository = {
   async findById(id: string) {
     return prisma.user.findUnique({
       where: { id },
-      select: { id: true, email: true, username: true, createdAt: true },
+      select: { id: true, email: true, username: true, createdAt: true, credits: true },
     });
   },
 };

@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useMe } from "@/hooks/useAuth";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -29,6 +30,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const clearToken = useAuthStore((s) => s.clearToken);
+  const { data: me } = useMe();
   const volume = usePlayerStore((s) => s.volume);
   const setVolume = usePlayerStore((s) => s.setVolume);
 
@@ -47,7 +49,10 @@ export default function Navbar() {
           </a>
 
           {/* Desktop search */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-sm items-center relative">
+          <form
+            onSubmit={handleSearch}
+            className="hidden md:flex flex-1 max-w-sm items-center relative"
+          >
             <Search className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
               type="search"
@@ -83,6 +88,14 @@ export default function Navbar() {
               aria-label="Volume"
             />
           </div>
+
+          {/* Credits */}
+          {isLoggedIn && me && (
+            <div className="hidden md:flex items-center gap-1 text-sm font-medium text-muted-foreground">
+              <span className="text-primary font-semibold">{me.credits}</span>
+              <span>credits</span>
+            </div>
+          )}
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-2">

@@ -1,6 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/authStore";
-import { login, register } from "@/api/auth";
+import { login, register, fetchMe } from "@/api/auth";
 
 export function useLogin() {
   const setToken = useAuthStore((s) => s.setToken);
@@ -23,4 +23,13 @@ export function useRegister() {
 export function useLogout() {
   const clearToken = useAuthStore((s) => s.clearToken);
   return clearToken;
+}
+
+export function useMe() {
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  return useQuery({
+    queryKey: ["me"],
+    queryFn: fetchMe,
+    enabled: isLoggedIn,
+  });
 }

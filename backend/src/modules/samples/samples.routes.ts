@@ -24,6 +24,7 @@ router.post(
   validateWavBuffer,
   SamplesController.create,
 );
+router.post("/:id/download", authenticate, SamplesController.download);
 router.delete("/:id", authenticate, SamplesController.remove);
 
 export default router;

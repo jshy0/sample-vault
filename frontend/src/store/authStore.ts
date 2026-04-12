@@ -4,8 +4,10 @@ import { persist } from "zustand/middleware";
 interface AuthState {
   token: string | null;
   isLoggedIn: boolean;
+  credits: number | null;
   setToken: (token: string) => void;
   clearToken: () => void;
+  setCredits: (credits: number) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -13,8 +15,10 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       token: null,
       isLoggedIn: false,
+      credits: null,
       setToken: (token) => set({ token, isLoggedIn: true }),
-      clearToken: () => set({ token: null, isLoggedIn: false }),
+      clearToken: () => set({ token: null, isLoggedIn: false, credits: null }),
+      setCredits: (credits) => set({ credits }),
     }),
     {
       name: "auth",

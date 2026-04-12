@@ -3,14 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Sample } from "@/types/sample";
 import { useAuthStore } from "@/store/authStore";
+import { apiClient } from "@/api/client";
 
-async function handleDownload(
-  fileUrl: string,
-  name: string,
-  isLoggedIn: boolean,
-) {
-  if (!isLoggedIn) return;
-  const res = await fetch(fileUrl);
+async function handleDownload(sampleId: string, name: string) {
+  const { data } = await apiClient.post<{ url: string }>(`/samples/${sampleId}/download`);
+  const res = await fetch(data.url);
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -78,7 +75,7 @@ export default function SampleRow({
           variant="ghost"
           size="icon"
           onClick={() =>
-            handleDownload(sample.fileUrl, sample.name, isLoggedIn)
+            handleDownload(sample.id, sample.name)
           }
           aria-label="Download"
           className="shrink-0"

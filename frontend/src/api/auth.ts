@@ -29,3 +29,15 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
   const { data } = await apiClient.post<AuthResponse>("/auth/login", payload);
   return data;
 }
+
+export interface Me {
+  id: string;
+  username: string;
+  email: string;
+  credits: number;
+}
+
+export async function fetchMe(): Promise<Me> {
+  const { data } = await apiClient.get<Me>("/auth/me");
+  return data;
+}

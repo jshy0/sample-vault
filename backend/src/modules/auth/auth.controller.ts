@@ -28,4 +28,14 @@ export const AuthController = {
       next(err);
     }
   },
+
+  async me(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await AuthService.getUserById(req.user!.userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+      res.json(user);
+    } catch (err) {
+      next(err);
+    }
+  },
 };

@@ -1,4 +1,5 @@
-import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "crypto";
 import { s3, S3_BUCKET } from "../config/s3.js";
 
@@ -26,6 +27,15 @@ export const StorageService = {
         Bucket: S3_BUCKET,
         Key: key,
       }),
+    );
+  },
+
+  async getPresignedUrl(fileUrl: string): Promise<string> {
+    const key = new URL(fileUrl).pathname.slice(1);
+    return getSignedUrl(
+      s3,
+      new GetObjectCommand({ Bucket: S3_BUCKET, Key: key }),
+      { expiresIn: 60 },
     );
   },
 };

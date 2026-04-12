@@ -70,4 +70,17 @@ export const SamplesController = {
       next(error);
     }
   },
+
+  async download(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!.userId;
+      const url = await SamplesService.downloadSample(
+        req.params.id as string,
+        userId,
+      );
+      res.json({ url });
+    } catch (err) {
+      next(err);
+    }
+  },
 };

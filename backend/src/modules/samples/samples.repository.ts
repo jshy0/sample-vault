@@ -31,23 +31,39 @@ export const SamplesRepository = {
     return prisma.sample.findFirst({ where: { id, userId } });
   },
 
+  async findByIdPublic(id: string) {
+    return prisma.sample.findUnique({ where: { id } });
+  },
+
+  async findDownload(userId: string, sampleId: string) {
+    return prisma.download.findUnique({
+      where: { userId_sampleId: { userId, sampleId } },
+    });
+  },
+
   async create(
     userId: string,
     data: CreateSampleDTO,
     fileUrl: string,
   ): Promise<Sample> {
-    const sample = await prisma.sample.create({
-      data: {
-        userId,
-        name: data.name,
-        bpm: data.bpm,
-        key: data.key,
-        mode: data.mode,
-        tags: data.tags ?? [],
-        fileUrl,
-      },
-      include: { user: { select: { username: true } } },
-    });
+    const [sample] = await prisma.$transaction([
+      prisma.sample.create({
+        data: {
+          userId,
+          name: data.name,
+          bpm: data.bpm,
+          key: data.key,
+          mode: data.mode,
+          tags: data.tags ?? [],
+          fileUrl,
+        },
+        include: { user: { select: { username: true } } },
+      }),
+      prisma.user.update({
+        where: { id: userId },
+        data: { credits: { increment: 4 } },
+      }),
+    ]);
     return flattenSample(sample);
   },
 
